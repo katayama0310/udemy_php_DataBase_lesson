@@ -5,7 +5,8 @@ import { buildSchema } from 'graphql';
 // Construct a schema, using GraphQL schema language
 const schema = buildSchema(`
   type Query {
-    hello: String
+    hello: String,
+    name: String,
   }
 `);
 
@@ -13,6 +14,9 @@ const schema = buildSchema(`
 const root = {
   hello: () => {
     return 'Hello world!';
+  },
+  name: () => {
+    return 'My name is Khoa';
   },
 };
 
