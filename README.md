@@ -1,1 +1,3 @@
-https://graphql.org/graphql-js/running-an-express-graphql-server/
+- https://graphql.org/graphql-js/running-an-express-graphql-server/
+- https://www.wakuwakubank.com/posts/641-nodejs-graphql/
+- https://zenn.dev/sungvalley/articles/4de76c12826709
