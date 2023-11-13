@@ -8,3 +8,7 @@
 ```bash
 docker compose up -d
 ```
+## in
+```bash
+docker exec -it server /bin/bash
+```
