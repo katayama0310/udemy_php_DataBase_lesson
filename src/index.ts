@@ -23,17 +23,22 @@ initializeApp({
 
 const db = firestore();
 
-const addData = async () => {
-  const docRef = db.collection('users');
+// const addData = async () => {
+//   const docRef = db.collection('users');
 
-  await docRef.add({
-    first: 'Ada',
-    last: 'Lovelace',
-    born: 1815,
-  });
+//   await docRef.add({
+//     first: 'Ada',
+//     last: 'Lovelace',
+//     born: 1815,
+//   });
+// };
+
+const getUser = async (): Promise<void> => {
+  (await db.collection('users').doc('1').get()).data();
 };
 
-addData();
+// addData();
+// getUser();
 
 // Define a custom error type
 const MyGraphQLError = new GraphQLObjectType({
@@ -44,20 +49,42 @@ const MyGraphQLError = new GraphQLObjectType({
 });
 
 // Extend your existing schema to include the error type
-const extendedSchema = new GraphQLSchema({
-  query: new GraphQLObjectType({
-    name: 'errorrrrr',
-    fields: {
-      quoteOfTheDay: { type: GraphQLString },
-      random: { type: GraphQLFloat },
-      rollThreeDice: { type: new GraphQLList(GraphQLFloat) },
-    },
-  }),
-  types: [MyGraphQLError],
-  extensions: {
-    code: 'GRAPHQL_VALIDATION_FAILED',
-  },
-});
+// const extendedSchema = new GraphQLSchema({
+//   query: new GraphQLObjectType({
+//     name: 'error',
+//     fields: {
+//       quoteOfTheDay: { type: GraphQLString },
+//       random: { type: GraphQLFloat },
+//       rollThreeDice: { type: new GraphQLList(GraphQLFloat) },
+//       getUser: { type: firestore.QuerySnapshot<firestore.DocumentData> },
+//     },
+//   }),
+//   types: [MyGraphQLError],
+//   extensions: {
+//     code: 'GRAPHQL_VALIDATION_FAILED',
+//   },
+// });
+
+type User = {
+  last: string;
+  first: string;
+  born: number;
+};
+
+const schema = buildSchema(`
+  type Query {
+    quoteOfTheDay: String
+    random: Float!
+    rollThreeDice: [Int]
+    getUser(id: String): User
+  }
+
+  type User {
+    last: String
+    first: String
+    born: Int
+  }
+`);
 
 const root = {
   quoteOfTheDay: () => {
@@ -74,13 +101,20 @@ const root = {
   rollThreeDice: () => {
     return [1, 2, 3].map((_) => 1 + Math.floor(Math.random() * 6));
   },
+  // getUserをschemaに合うように書いて
+  getUser: async (doc: { id: string }) => {
+    console.log(doc);
+    const data = (await db.collection('users').doc(doc.id).get()).data();
+    console.log(data);
+    return data;
+  },
 };
 
 const app = express();
 app.use(
   '/graphql',
   graphqlHTTP({
-    schema: extendedSchema, // Use the extended schema with custom error type
+    schema: schema, // Use the extended schema with custom error type
     rootValue: root,
     graphiql: true,
     customFormatErrorFn: (error) => ({
