@@ -1,18 +1,47 @@
+import e from 'express';
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
-import { buildSchema } from 'graphql';
+import {
+  buildSchema,
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLFloat,
+  GraphQLList,
+} from 'graphql';
 
-const schema = buildSchema(`
-  type Query {
-    quoteOfTheDay: String
-    random: Float!
-    rollThreeDice: [Int]
-  }
-`);
+// Define a custom error type
+const MyGraphQLError = new GraphQLObjectType({
+  name: 'MyGraphQLError',
+  fields: {
+    message: { type: GraphQLString },
+  },
+});
+
+// Extend your existing schema to include the error type
+const extendedSchema = new GraphQLSchema({
+  query: new GraphQLObjectType({
+    name: 'errorrrrr',
+    fields: {
+      quoteOfTheDay: { type: GraphQLString },
+      random: { type: GraphQLFloat },
+      rollThreeDice: { type: new GraphQLList(GraphQLFloat) },
+    },
+  }),
+  types: [MyGraphQLError],
+  extensions: {
+    code: 'GRAPHQL_VALIDATION_FAILED',
+  },
+});
 
 const root = {
   quoteOfTheDay: () => {
-    return Math.random() < 0.5 ? 'Take it easy' : 'Salvation lies within';
+    if (Math.random() < 0.5) {
+      return 'Take it easy';
+    } else {
+      // Throw an error
+      throw new Error('An error occurred while generating the quote.');
+    }
   },
   random: () => {
     return Math.random();
@@ -26,9 +55,17 @@ const app = express();
 app.use(
   '/graphql',
   graphqlHTTP({
-    schema,
+    schema: extendedSchema, // Use the extended schema with custom error type
     rootValue: root,
     graphiql: true,
+    customFormatErrorFn: (error) => ({
+      message: error.message,
+      locations: error.locations,
+      path: error.path,
+      extensions: {
+        code: error.extensions?.code,
+      },
+    }),
   })
 );
 
