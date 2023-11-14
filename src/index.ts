@@ -9,6 +9,32 @@ import {
   GraphQLList,
 } from 'graphql';
 
+import { initializeApp } from 'firebase-admin/app';
+import { credential, ServiceAccount, firestore } from 'firebase-admin';
+import {} from 'firebase-admin/firestore';
+import firebaseServiceAccount from '../serviceAccountKey.json';
+
+const serviceAccount = firebaseServiceAccount as ServiceAccount;
+
+initializeApp({
+  credential: credential.cert(serviceAccount),
+  // databaseURL: 'https://<DATABASE_NAME>.firebaseio.com'
+});
+
+const db = firestore();
+
+const addData = async () => {
+  const docRef = db.collection('users');
+
+  await docRef.add({
+    first: 'Ada',
+    last: 'Lovelace',
+    born: 1815,
+  });
+};
+
+addData();
+
 // Define a custom error type
 const MyGraphQLError = new GraphQLObjectType({
   name: 'MyGraphQLError',
