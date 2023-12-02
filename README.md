@@ -26,3 +26,8 @@ docker exec -it server /bin/bash
 - [ ] docker
 - [ ] devContainer
 - [ ] https://zenn.dev/harusame0616/articles/170b6ae38de086 <- この続きをやる
+
+## 事前準備
+
+- node_modules をインストールする
+- firebase serviceAccountKey.json を用意する
