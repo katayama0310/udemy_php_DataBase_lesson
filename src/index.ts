@@ -13,7 +13,6 @@ type User = {
 const schema = buildSchema(`
   type Query {
     quoteOfTheDay: String
-    random: Float!
     rollThreeDice: [Int]
     getUser(id: String): User
   }
@@ -38,9 +37,6 @@ const root = {
     } else {
       throw new Error('An error occurred while generating the quote.');
     }
-  },
-  random: () => {
-    return Math.random();
   },
   rollThreeDice: () => {
     return [1, 2, 3].map((_) => 1 + Math.floor(Math.random() * 6));
