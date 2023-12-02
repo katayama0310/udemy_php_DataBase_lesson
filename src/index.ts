@@ -23,23 +23,6 @@ initializeApp({
 
 const db = firestore();
 
-// const addData = async () => {
-//   const docRef = db.collection('users');
-
-//   await docRef.add({
-//     first: 'Ada',
-//     last: 'Lovelace',
-//     born: 1815,
-//   });
-// };
-
-const getUser = async (): Promise<void> => {
-  (await db.collection('users').doc('1').get()).data();
-};
-
-// addData();
-// getUser();
-
 // Define a custom error type
 const MyGraphQLError = new GraphQLObjectType({
   name: 'MyGraphQLError',
@@ -77,6 +60,9 @@ const schema = buildSchema(`
     random: Float!
     rollThreeDice: [Int]
     getUser(id: String): User
+    addUser(last: String, first: String, born: Int): User
+    updateUser(id: String, last: String, first: String, born: Int): User
+    deleteUser(id: String): User
   }
 
   type User {
@@ -101,14 +87,40 @@ const root = {
   rollThreeDice: () => {
     return [1, 2, 3].map((_) => 1 + Math.floor(Math.random() * 6));
   },
-  // getUserをschemaに合うように書いて
   getUser: async (doc: { id: string }) => {
-    console.log(doc);
     const data = (await db.collection('users').doc(doc.id).get()).data();
-    console.log(data);
     return data;
   },
+  addUser: async (user: User) => {
+    const docRef = db.collection('users');
+    return await docRef.add(user);
+  },
+  updateUser: async ({ id, first, last, born }: User & { id: string }) => {
+    const docRef = db.collection('users').doc(id);
+    return await docRef.update({ first, last, born });
+  },
+
+  deleteUser: async (doc: { id: string }) => {
+    const docRef = db.collection('users').doc(doc.id);
+    return await docRef.delete();
+  },
 };
+
+/**
+クエリ
+{
+  getUser(id: "VNQsGdl1XtnRL01mIkdo") {
+    first
+    last
+    born
+  }
+  updateUser(id: "VNQsGdl1XtnRL01mIkdo",first:"aaa",last:"bbb",born:1000){
+    last
+    first
+    born
+  }
+}
+*/
 
 const app = express();
 app.use(
