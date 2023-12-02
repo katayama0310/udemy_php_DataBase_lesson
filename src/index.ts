@@ -9,19 +9,7 @@ import {
   GraphQLList,
 } from 'graphql';
 
-import { initializeApp } from 'firebase-admin/app';
-import { credential, ServiceAccount, firestore } from 'firebase-admin';
-import {} from 'firebase-admin/firestore';
-import firebaseServiceAccount from '../serviceAccountKey.json';
-
-const serviceAccount = firebaseServiceAccount as ServiceAccount;
-
-initializeApp({
-  credential: credential.cert(serviceAccount),
-  // databaseURL: 'https://<DATABASE_NAME>.firebaseio.com'
-});
-
-const db = firestore();
+import { addUser, deleteUser, getUser, updateUser } from './user';
 
 // Define a custom error type
 const MyGraphQLError = new GraphQLObjectType({
@@ -87,23 +75,11 @@ const root = {
   rollThreeDice: () => {
     return [1, 2, 3].map((_) => 1 + Math.floor(Math.random() * 6));
   },
-  getUser: async (doc: { id: string }) => {
-    const data = (await db.collection('users').doc(doc.id).get()).data();
-    return data;
-  },
-  addUser: async (user: User) => {
-    const docRef = db.collection('users');
-    return await docRef.add(user);
-  },
-  updateUser: async ({ id, first, last, born }: User & { id: string }) => {
-    const docRef = db.collection('users').doc(id);
-    return await docRef.update({ first, last, born });
-  },
-
-  deleteUser: async (doc: { id: string }) => {
-    const docRef = db.collection('users').doc(doc.id);
-    return await docRef.delete();
-  },
+  getUser: ({ id }: { id: string }) => getUser(id),
+  addUser: ({ user }: { user: User }) => addUser(user),
+  updateUser: ({ id, first, last, born }: User & { id: string }) =>
+    updateUser({ id, first, last, born }),
+  deleteUser: ({ id }: { id: string }) => deleteUser(id),
 };
 
 /**
