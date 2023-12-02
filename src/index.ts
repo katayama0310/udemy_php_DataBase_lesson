@@ -2,7 +2,7 @@ import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 
 import { addUser, deleteUser, getUser, updateUser } from './user';
-import { baseSchema, extendedSchema } from './schema';
+import { extendedSchema } from './schema';
 
 type User = {
   last: string;
@@ -32,7 +32,7 @@ const app = express();
 app.use(
   '/graphql',
   graphqlHTTP({
-    schema: baseSchema,
+    schema: extendedSchema,
     rootValue: root,
     graphiql: true,
     customFormatErrorFn: (error) => ({

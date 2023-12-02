@@ -1,61 +1,104 @@
 import {
-  buildSchema,
+  GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
   GraphQLFloat,
   GraphQLList,
-  GraphQLSchema,
+  GraphQLID,
+  GraphQLScalarType,
 } from 'graphql';
-import { MyGraphQLError } from './customError';
 
-type User = {
-  last: string;
-  first: string;
-  born: number;
-};
-
-const baseSchema = buildSchema(`
-  type Query {
-    quoteOfTheDay: String
-    rollThreeDice: [Int]
-    getUser(id: String): User
-  }
-
-  type Mutation {
-    addUser(last: String, first: String, born: Int): User
-    updateUser(id: String, last: String, first: String, born: Int): User
-    deleteUser(id: String): User
-  }
-
-  type User {
-    last: String
-    first: String
-    born: Int
-  }
-`);
-
-const extendedQueryType = new GraphQLObjectType({
-  name: 'ExtendedQuery',
+const UserType = new GraphQLObjectType({
+  name: 'User',
   fields: {
-    quoteOfTheDay: { type: GraphQLString },
-    rollThreeDice: { type: new GraphQLList(GraphQLFloat) },
+    last: { type: GraphQLString },
+    first: { type: GraphQLString },
+    born: { type: GraphQLFloat },
   },
 });
 
-const extendedMutationType = new GraphQLObjectType({
-  name: 'ExtendedMutation',
-  fields: {
-    add: { type: GraphQLFloat },
-  },
+const baseSchema = new GraphQLSchema({
+  query: new GraphQLObjectType({
+    name: 'Query',
+    fields: {
+      quoteOfTheDay: { type: GraphQLString },
+      rollThreeDice: { type: new GraphQLList(GraphQLFloat) },
+      getUser: {
+        type: UserType,
+        args: { id: { type: GraphQLID } },
+      },
+    },
+  }),
+  mutation: new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+      addUser: {
+        type: UserType,
+        args: {
+          last: { type: GraphQLString },
+          first: { type: GraphQLString },
+          born: { type: GraphQLFloat },
+        },
+      },
+      updateUser: {
+        type: UserType,
+        args: {
+          id: { type: GraphQLID },
+          last: { type: GraphQLString },
+          first: { type: GraphQLString },
+          born: { type: GraphQLFloat },
+        },
+      },
+      deleteUser: {
+        type: UserType,
+        args: { id: { type: GraphQLID } },
+      },
+    },
+  }),
 });
 
 const extendedSchema = new GraphQLSchema({
-  query: extendedQueryType,
-  mutation: extendedMutationType,
-  types: [MyGraphQLError],
-  extensions: {
-    code: 'GRAPHQL_VALIDATION_FAILED',
-  },
+  query: new GraphQLObjectType({
+    name: 'ExtendedQuery',
+    fields: {
+      quoteOfTheDay: { type: GraphQLString },
+      rollThreeDice: { type: new GraphQLList(GraphQLFloat) },
+      getUser: {
+        type: UserType,
+        args: { id: { type: GraphQLID } },
+      },
+      add: { type: GraphQLFloat },
+    },
+  }),
+  mutation: new GraphQLObjectType({
+    name: 'ExtendedMutation',
+    fields: {
+      addUser: {
+        type: UserType,
+        args: {
+          last: { type: GraphQLString },
+          first: { type: GraphQLString },
+          born: { type: GraphQLFloat },
+        },
+      },
+      updateUser: {
+        type: UserType,
+        args: {
+          id: { type: GraphQLID },
+          last: { type: GraphQLString },
+          first: { type: GraphQLString },
+          born: { type: GraphQLFloat },
+        },
+      },
+      deleteUser: {
+        type: UserType,
+        args: { id: { type: GraphQLID } },
+      },
+    },
+  }),
+  types: Object.values(baseSchema.getTypeMap()).filter(
+    (type) => type instanceof GraphQLScalarType
+  ),
 });
 
 export { baseSchema, extendedSchema };
