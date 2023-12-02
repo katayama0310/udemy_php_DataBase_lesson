@@ -32,6 +32,9 @@ export const updateUser = async ({
 export const deleteUser = async (id: string) => {
   const docRef = db.collection('users').doc(id);
   const deletedUser = await docRef.get();
+  if (!deletedUser.exists) {
+    throw new Error('User does not exist');
+  }
   await docRef.delete();
   return deletedUser.data();
 };

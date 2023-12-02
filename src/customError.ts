@@ -1,14 +1,14 @@
-import { firestore } from 'firebase-admin';
 import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
   GraphQLFloat,
   GraphQLList,
+  GraphQLError,
 } from 'graphql';
 
 // Define a custom error type
-const MyGraphQLError = new GraphQLObjectType({
+export const MyGraphQLError = new GraphQLObjectType({
   name: 'MyGraphQLError',
   fields: {
     message: { type: GraphQLString },
@@ -23,7 +23,12 @@ const extendedSchema = new GraphQLSchema({
       quoteOfTheDay: { type: GraphQLString },
       random: { type: GraphQLFloat },
       rollThreeDice: { type: new GraphQLList(GraphQLFloat) },
-      // getUser: { type: firestore.QuerySnapshot<firestore.DocumentData> },
+    },
+  }),
+  mutation: new GraphQLObjectType({
+    name: 'error',
+    fields: {
+      add: { type: GraphQLFloat },
     },
   }),
   types: [MyGraphQLError],
