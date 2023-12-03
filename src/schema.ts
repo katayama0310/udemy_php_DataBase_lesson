@@ -5,8 +5,8 @@ import {
   GraphQLFloat,
   GraphQLList,
   GraphQLID,
-  GraphQLScalarType,
 } from 'graphql';
+import { MyGraphQLError } from './customError';
 
 const UserType = new GraphQLObjectType({
   name: 'User',
@@ -96,9 +96,10 @@ const extendedSchema = new GraphQLSchema({
       },
     },
   }),
-  types: Object.values(baseSchema.getTypeMap()).filter(
-    (type) => type instanceof GraphQLScalarType
-  ),
+  types: [MyGraphQLError],
+  extensions: {
+    code: 'GRAPHQL_VALIDATION_FAILED',
+  },
 });
 
 export { baseSchema, extendedSchema };

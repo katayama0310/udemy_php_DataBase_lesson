@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLError, GraphQLObjectType, GraphQLString } from 'graphql';
 
 // Define a custom error type
 export const MyGraphQLError = new GraphQLObjectType({
@@ -7,3 +7,11 @@ export const MyGraphQLError = new GraphQLObjectType({
     message: { type: GraphQLString },
   },
 });
+
+export const customError = () => {
+  throw new GraphQLError('user aleady exists', {
+    extensions: {
+      code: '該当のユーザーは既に存在します。',
+    },
+  });
+};

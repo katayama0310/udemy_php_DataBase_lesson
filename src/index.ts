@@ -3,6 +3,7 @@ import { graphqlHTTP } from 'express-graphql';
 
 import { addUser, deleteUser, getUser, updateUser } from './user';
 import { extendedSchema } from './schema';
+import { customError } from './customError';
 
 type User = {
   last: string;
@@ -15,7 +16,7 @@ const root = {
     if (Math.random() < 0.5) {
       throw new Error('Failed to fetch quote of the day');
     } else {
-      return 'Take it easy';
+      customError();
     }
   },
   rollThreeDice: () => {
@@ -40,7 +41,7 @@ app.use(
       locations: error.locations,
       path: error.path,
       extensions: {
-        code: error.extensions?.code,
+        code: { code: error.extensions?.code },
       },
     }),
   })
